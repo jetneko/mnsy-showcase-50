@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, HardHat, Home, Hammer, Ruler, ShieldCheck, Wrench, Phone, Mail, MapPin, Facebook, CheckCircle2 } from "lucide-react";
-import logoAsset from "@/assets/mnsy-logo.png.asset.json";
+import logoUrl from "@/assets/mnsy-logo.jpg";
 import heroHome from "@/assets/hero-home.jpg";
 import project1 from "@/assets/project-1.jpg";
 import project2 from "@/assets/project-2.jpg";
@@ -91,7 +91,7 @@ function Nav() {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <a href="#top" className="flex items-center gap-3">
-          <img src={logoAsset.url} alt="MNSY Construction logo" width={44} height={44} className="h-11 w-11 rounded-full" />
+          <img src={logoUrl} alt="MNSY Construction logo" width={44} height={44} className="h-11 w-11 rounded-full" />
           <div className="leading-tight">
             <div className="font-display text-lg font-black tracking-tight text-primary">MNSY</div>
             <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-secondary">Construction</div>
@@ -225,7 +225,7 @@ function CinematicLogo() {
       <div className="sticky top-0 flex h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-8 px-6 text-center">
           <img
-            src={logoAsset.url}
+            src={logoUrl}
             alt="MNSY Construction logo"
             width={220}
             height={220}
@@ -449,7 +449,7 @@ function Footer() {
     <footer className="border-t border-border bg-card">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
         <div className="flex items-center gap-3">
-          <img src={logoAsset.url} alt="MNSY Construction" width={32} height={32} className="h-8 w-8 rounded-full" />
+          <img src={logoUrl} alt="MNSY Construction" width={32} height={32} className="h-8 w-8 rounded-full" />
           <div className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} MNSY Construction. All rights reserved.
           </div>
