@@ -1,5 +1,6 @@
 import { EffectComposer, Bloom, SSAO } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
+import type * as THREE from "three";
 
 /**
  * Bloom + subtle SSAO on desktop; nothing on mobile. No DOF — too expensive

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, HardHat, Home, Hammer, Ruler, ShieldCheck, Wrench, Phone, Mail, MapPin, Facebook, CheckCircle2 } from "lucide-react";
+import { ArrowRight, HardHat, Home, Hammer, Ruler, ShieldCheck, Wrench, Phone, Mail, MapPin, Facebook } from "lucide-react";
 import logoUrl from "@/assets/mnsy-logo.jpg";
 import heroHome from "@/assets/hero-home.jpg";
 import project1 from "@/assets/project-1.jpg";
@@ -10,6 +10,7 @@ import project4 from "@/assets/project-4.jpg";
 import project5 from "@/assets/project-5.jpg";
 import project6 from "@/assets/project-6.jpg";
 import project7 from "@/assets/project-7.jpg";
+import { AboutScene } from "@/components/AboutScene";
 
 export const Route = createFileRoute("/")({
   component: Index,
