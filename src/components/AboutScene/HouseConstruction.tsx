@@ -21,7 +21,17 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
   const groundRef = useRef<THREE.Mesh>(null);
   const drivewayRef = useRef<THREE.Mesh>(null);
   const treesRef = useRef<THREE.InstancedMesh>(null);
-  const wallMatRef = useRef<THREE.MeshStandardMaterial>(null);
+  const wallMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
+  const wallMaterial = useMemo(() => {
+    const m = new THREE.MeshStandardMaterial({
+      color: new THREE.Color("#3a5a7a"),
+      emissive: new THREE.Color("#1a6fd8"),
+      emissiveIntensity: 0.4,
+      roughness: 0.9,
+    });
+    wallMatRef.current = m;
+    return m;
+  }, []);
 
   // -- Layout ------------------------------------------------------------------
   const W = 12, D = 8, H = 3;
@@ -223,18 +233,11 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
         <meshStandardMaterial color="#1e2530" roughness={1} />
       </mesh>
 
-      {/* Walls */}
+      {/* Walls — one shared material so stage-5 finish shift applies to all */}
       <group ref={wallsRef}>
         {wallDefs.map((w, i) => (
-          <mesh key={i} position={w.pos} castShadow receiveShadow>
+          <mesh key={i} position={w.pos} castShadow receiveShadow material={wallMaterial}>
             <boxGeometry args={w.size} />
-            <meshStandardMaterial
-              ref={i === 0 ? wallMatRef : undefined}
-              color="#3a5a7a"
-              emissive="#1a6fd8"
-              emissiveIntensity={0.4}
-              roughness={0.9}
-            />
           </mesh>
         ))}
       </group>
