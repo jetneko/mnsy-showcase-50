@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, HardHat, Home, Hammer, Ruler, ShieldCheck, Wrench, Phone, Mail, MapPin, Facebook, CheckCircle2 } from "lucide-react";
+import { ArrowRight, HardHat, Home, Hammer, Ruler, ShieldCheck, Wrench, Phone, Mail, MapPin, Facebook } from "lucide-react";
 import logoUrl from "@/assets/mnsy-logo.jpg";
 import heroHome from "@/assets/hero-home.jpg";
 import project1 from "@/assets/project-1.jpg";
@@ -10,6 +10,7 @@ import project4 from "@/assets/project-4.jpg";
 import project5 from "@/assets/project-5.jpg";
 import project6 from "@/assets/project-6.jpg";
 import project7 from "@/assets/project-7.jpg";
+import { AboutScene } from "@/components/AboutScene";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -76,7 +77,7 @@ function Index() {
       <Hero />
       <Stats />
       <CinematicLogo />
-      <About />
+      <AboutScene />
       <Services />
       <Projects />
       <MissionVision />
@@ -260,41 +261,7 @@ function StatsInner() {
   );
 }
 
-function About() {
-  return (
-    <section id="about" className="mx-auto max-w-7xl px-6 py-24">
-      <div className="grid gap-16 md:grid-cols-2 md:items-center">
-        <div>
-          <SectionLabel>About us</SectionLabel>
-          <h2 className="mt-4 font-display text-4xl font-black leading-tight text-primary md:text-5xl">
-            Precision from planning to execution.
-          </h2>
-          <p className="mt-6 text-lg leading-relaxed text-foreground/95">
-            Our experienced team manages every aspect of construction with precision — from planning to execution. We prioritize quality, safety, and strong client relationships to ensure timely delivery and lasting satisfaction.
-          </p>
-          <ul className="mt-8 space-y-3">
-            {[
-              "Fixed-scope estimates and transparent timelines",
-              "Licensed engineers and skilled trades on every job",
-              "Site safety protocols and quality audits",
-              "Direct communication from first meeting to handover",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-3 text-foreground/95">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-secondary" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="relative">
-          <div className="absolute -left-6 -top-6 h-24 w-24 rounded-full bg-secondary/20" />
-          <div className="absolute -bottom-6 -right-6 h-32 w-32 rounded-full border-4 border-primary/20" />
-          <img src={project1} alt="MNSY Construction team working on-site" width={1200} height={900} loading="lazy" className="relative rounded-lg object-cover shadow-xl" />
-        </div>
-      </div>
-    </section>
-  );
-}
+// Old About() section removed — replaced by the scroll-driven <AboutScene />.
 
 function Services() {
   return (
