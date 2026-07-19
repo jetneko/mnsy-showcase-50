@@ -439,7 +439,6 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
         args={[undefined as unknown as THREE.BufferGeometry, undefined as unknown as THREE.Material, treeCount]}
         castShadow
         visible={false}
-        position={[0, -0.6, 0]}
       >
         <cylinderGeometry args={[0.09, 0.12, 1.2, 6]} />
         <meshStandardMaterial color="#3a2a1c" roughness={1} />
