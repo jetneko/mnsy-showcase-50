@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "MNSY Construction — Trusted Contractor in the Philippines" },
-      { name: "description", content: "MNSY Construction delivers quality residential and commercial construction, renovation, and project management across the Philippines. Precision from planning to execution." },
+      { title: "MNSY Construction — Residential & Commercial Contractor Philippines" },
+      { name: "description", content: "MNSY Construction builds and renovates residential and commercial properties across the Philippines. Precision planning, quality craftsmanship, on-time delivery." },
       { name: "author", content: "MNSY Construction" },
-      { property: "og:title", content: "MNSY Construction — Trusted Contractor in the Philippines" },
-      { property: "og:description", content: "Residential and commercial construction, renovation, and project management. Quality craftsmanship, on time, on budget." },
+      { property: "og:title", content: "MNSY Construction — Residential & Commercial Contractor Philippines" },
+      { property: "og:description", content: "MNSY Construction builds and renovates residential and commercial properties across the Philippines. Precision planning, quality craftsmanship, on-time delivery." },
       { property: "og:site_name", content: "MNSY Construction" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "MNSY Construction — Residential & Commercial Contractor Philippines" },
+      { name: "twitter:description", content: "MNSY Construction builds and renovates residential and commercial properties across the Philippines. Precision planning, quality craftsmanship, on-time delivery." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1087e267-beb8-47c5-8ab1-9c259120362e/id-preview-cc5bf455--10567ea5-2eec-4fd6-b24d-39eff3950601.lovable.app-1784422304739.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1087e267-beb8-47c5-8ab1-9c259120362e/id-preview-cc5bf455--10567ea5-2eec-4fd6-b24d-39eff3950601.lovable.app-1784422304739.png" },
     ],
     links: [
       {
