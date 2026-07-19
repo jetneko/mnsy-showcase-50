@@ -5,19 +5,24 @@ import { useProgressRef } from "./progress";
 import { smoothstep, stageLocal } from "./stages";
 
 /**
- * Floating blueprint-style dimension labels. Visible during blueprint +
- * framing stages (0–2), fade out once materials arrive.
+ * Floating blueprint-style dimension labels. Fully faded out by the time
+ * the roof arrives (stage 4) — they belong to the blueprint/framing phase.
  */
 export function DimensionAnnotations() {
   const progress = useProgressRef();
-  const groupRef = useRef<HTMLDivElement | null>(null);
+  const l1 = useRef<HTMLDivElement | null>(null);
+  const l2 = useRef<HTMLDivElement | null>(null);
+  const l3 = useRef<HTMLDivElement | null>(null);
 
   useFrame(() => {
-    if (!groupRef.current) return;
     const p = progress.current;
     const s0 = smoothstep(stageLocal(p, 0));
-    const s3 = smoothstep(stageLocal(p, 3));
-    groupRef.current.style.opacity = String(Math.max(0, s0 - s3));
+    // Fade fully out over stages 2→3 (framing → openings), gone by stage 3.
+    const fadeOut = smoothstep(stageLocal(p, 2));
+    const opacity = String(Math.max(0, s0 * (1 - fadeOut)));
+    if (l1.current) l1.current.style.opacity = opacity;
+    if (l2.current) l2.current.style.opacity = opacity;
+    if (l3.current) l3.current.style.opacity = opacity;
   });
 
   const labelClass =
@@ -25,16 +30,14 @@ export function DimensionAnnotations() {
 
   return (
     <group>
-      <Html position={[0, 0.05, -4.5]} center transform={false} distanceFactor={undefined}>
-        <div ref={groupRef} className="flex flex-col items-center gap-1">
-          <div className={labelClass}>12.00 m</div>
-        </div>
+      <Html position={[0, 0.05, -4.5]} center>
+        <div ref={l1} className={labelClass}>12.00 m</div>
       </Html>
       <Html position={[6.8, 0.05, 0]} center>
-        <div className={labelClass}>8.00 m</div>
+        <div ref={l2} className={labelClass}>8.00 m</div>
       </Html>
       <Html position={[0, 3.2, -4]} center>
-        <div className={labelClass}>+3.00 m FFL</div>
+        <div ref={l3} className={labelClass}>+3.00 m FFL</div>
       </Html>
     </group>
   );
