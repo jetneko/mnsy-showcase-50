@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { STAGES, STAGE_COUNT } from "./stages";
-import { HardHat, Ruler, ShieldCheck, Hammer, Home, Wrench, Trees, KeyRound, type LucideIcon } from "lucide-react";
+import { Ruler, Building, Building2, Layers, Sparkles, KeyRound, type LucideIcon } from "lucide-react";
 import type { ProgressRef } from "./progress";
 
-const STAGE_ICONS: LucideIcon[] = [Ruler, Hammer, HardHat, ShieldCheck, Home, Wrench, Trees, KeyRound];
+const STAGE_ICONS: LucideIcon[] = [Ruler, Building, Building2, Layers, Sparkles, KeyRound];
 
 /**
  * DOM overlay: current stage copy on the left, vertical stepper on the right.
