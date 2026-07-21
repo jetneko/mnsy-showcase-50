@@ -51,7 +51,7 @@ export function Blueprint() {
     if (gridRef.current) {
       const mat = gridRef.current.material as THREE.MeshBasicMaterial;
       // Blueprint grid dissolves into ground as construction progresses.
-      mat.opacity = 0.35 * (1 - smoothstep(stageLocal(p, 5)));
+      mat.opacity = 0.35 * (1 - smoothstep(stageLocal(p, 2)));
     }
   });
 
