@@ -94,8 +94,11 @@ export function CameraRig({ mobile }: { mobile: boolean }) {
       targetPos.current.multiplyScalar(1.2);
     }
     // Inertia: lerp toward target rather than snapping.
-    camera.position.lerp(targetPos.current, 0.12);
-    currentLook.current.lerp(targetLook.current, 0.12);
+    // Catch up faster when far off-target (e.g. first frames after mount or a
+    // large scroll jump) so the camera is never left inside the geometry.
+    const far = camera.position.distanceTo(targetPos.current) > 4;
+    camera.position.lerp(targetPos.current, far ? 0.4 : 0.12);
+    currentLook.current.lerp(targetLook.current, far ? 0.4 : 0.12);
     camera.lookAt(currentLook.current);
   });
   return null;
