@@ -8,6 +8,8 @@ import { Lighting } from "./Lighting";
 import { Effects } from "./Effects";
 import { DustParticles } from "./DustParticles";
 import { DimensionAnnotations } from "./DimensionAnnotations";
+import { StructuralSkeleton } from "./StructuralSkeleton";
+
 
 /**
  * The R3F scene root. Split into its own module so the entire three.js
@@ -31,11 +33,13 @@ export default function CanvasScene({
         style={{ position: "absolute", inset: 0 }}
       >
         <color attach="background" args={["#05070d"]} />
-        <fog attach="fog" args={["#05070d", 30, 90]} />
+        <fog attach="fog" args={["#05070d", 55, 140]} />
         <Suspense fallback={null}>
           <Lighting mobile={mobile} />
           <Blueprint />
+          <StructuralSkeleton mobile={mobile} />
           <HouseConstruction mobile={mobile} />
+
           {!mobile && <DustParticles count={mobile ? 40 : 120} />}
           {!mobile && <DimensionAnnotations />}
           <CameraRig mobile={mobile} />
