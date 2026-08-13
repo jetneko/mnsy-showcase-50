@@ -10,6 +10,32 @@ import { smoothstep, stageLocal } from "./stages";
 /** The building's longest horizontal span is fitted to this many scene units. */
 export const TARGET_SPAN = 18;
 
+/**
+ * Real building bounds measured from the v2 GLTF, EXCLUDING the oversized
+ * `SiteGround` slab (which otherwise skews the bounding box and throws the
+ * camera's look-at target onto empty ground).
+ *
+ * The GLTF's own accessor min/max are shared across all floor nodes (the split
+ * reuses one buffer), so an auto-computed Box3 is unreliable — these measured
+ * numbers are the source of truth.
+ */
+export const BUILDING_BOX = {
+  min: { x: 5.06, y: 0, z: -40.65 },
+  max: { x: 34.74, y: 14.15, z: -16.82 },
+} as const;
+
+export const BUILDING_CENTER = { x: 19.9, y: 7.08, z: -28.7 } as const;
+
+export const BUILDING_SIZE = {
+  x: BUILDING_BOX.max.x - BUILDING_BOX.min.x, // ~29.68
+  y: BUILDING_BOX.max.y - BUILDING_BOX.min.y, // ~14.15
+  z: BUILDING_BOX.max.z - BUILDING_BOX.min.z, // ~23.83
+} as const;
+
+/** Uniform scale that fits the real footprint into the rig's TARGET_SPAN. */
+export const BUILDING_SCALE =
+  TARGET_SPAN / Math.max(BUILDING_SIZE.x, BUILDING_SIZE.z);
+
 export type BuildingMetrics = {
   /** Fitted height in scene units (base at y=0). */
   height: number;
@@ -23,26 +49,33 @@ export type BuildingMetrics = {
   radius: number;
 };
 
+/**
+ * Derived directly from the measured building box, so the camera rig and the
+ * structural skeleton are correct from the very first frame (no waiting on the
+ * GLTF to load and publish metrics).
+ */
 export const buildingMetrics: BuildingMetrics = {
-  height: 6.5,
-  width: TARGET_SPAN,
-  depth: TARGET_SPAN * 0.5,
-  centerY: 3.25,
-  radius: TARGET_SPAN / 2,
+  height: BUILDING_SIZE.y * BUILDING_SCALE,
+  width: BUILDING_SIZE.x * BUILDING_SCALE,
+  depth: BUILDING_SIZE.z * BUILDING_SCALE,
+  centerY: (BUILDING_SIZE.y * BUILDING_SCALE) / 2,
+  radius:
+    (Math.max(BUILDING_SIZE.x, BUILDING_SIZE.z) * BUILDING_SCALE) / 2,
 };
 
 
 /**
- * Approximate slab elevations as fractions of total height, derived from the
- * real elevations detected in the model (0.00 / 3.25 / 6.23 / 9.34 / ~10.9 m
- * of a ~13 m mass). Index matches stage - 1.
+ * Slab elevations as fractions of total height, from the real elevations
+ * detected in the model (0.00 / 3.25 / 6.23 / 9.34 / ~10.9 m of a 14.15 m
+ * mass). Index matches stage - 1.
  */
-export const FLOOR_FRACTIONS = [0, 0.25, 0.48, 0.72, 0.84] as const;
+export const FLOOR_FRACTIONS = [0, 0.23, 0.44, 0.66, 0.77] as const;
 
 export function floorSlabY(index: number): number {
   const f = FLOOR_FRACTIONS[Math.min(index, FLOOR_FRACTIONS.length - 1)];
   return f * buildingMetrics.height;
 }
+
 
 function clamp01(x: number) {
   return Math.max(0, Math.min(1, x));
@@ -51,7 +84,7 @@ function clamp01(x: number) {
 /** Timing windows inside a single floor stage. */
 const SKELETON_END = 0.34; // skeleton beat is short and snappy
 const REVEAL_START = 0.24; // real geometry starts before skeleton is gone
-const REVEAL_END = 0.78; // and fully settles well before the next stage
+const REVEAL_END = 0.72; // settles fully, leaving a clear gap before the next stage
 
 export type FloorBeat = {
   /** 0→1 columns rising. */

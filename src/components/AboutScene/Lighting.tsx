@@ -18,25 +18,25 @@ export function Lighting({ mobile }: { mobile: boolean }) {
   useFrame(() => {
     const p = progress.current;
     // Warm-shift ramps up after stage 4 (roof on) and completes by stage 7.
-    const warm = smoothstep(stageLocal(p, 5)) * 0.7 + smoothstep(stageLocal(p, 6)) * 0.3;
+    const warm = smoothstep(stageLocal(p, 4)) * 0.35 + smoothstep(stageLocal(p, 5)) * 0.65;
     if (keyRef.current) {
       const cool = new THREE.Color("#7ec8ff");
       const golden = new THREE.Color("#ffd39a");
       keyRef.current.color.copy(cool).lerp(golden, warm);
-      keyRef.current.intensity = 0.8 + 0.6 * warm;
+      keyRef.current.intensity = 1.5 + 0.9 * warm;
     }
     if (ambRef.current) {
-      ambRef.current.intensity = 0.55 - 0.15 * warm;
+      ambRef.current.intensity = 0.75 - 0.1 * warm;
     }
   });
 
   return (
     <>
-      <ambientLight ref={ambRef} intensity={0.55} color="#a8c8ff" />
+      <ambientLight ref={ambRef} intensity={0.75} color="#a8c8ff" />
       <directionalLight
         ref={keyRef}
         position={[10, 14, 6]}
-        intensity={0.8}
+        intensity={1.5}
         color="#7ec8ff"
         castShadow
         shadow-mapSize-width={mobile ? 512 : 1024}
@@ -52,7 +52,7 @@ export function Lighting({ mobile }: { mobile: boolean }) {
         <directionalLight
           ref={fillRef}
           position={[-8, 6, -6]}
-          intensity={0.25}
+          intensity={0.45}
           color="#6a8fff"
         />
       )}

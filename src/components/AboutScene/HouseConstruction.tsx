@@ -5,12 +5,15 @@ import * as THREE from "three";
 import { useProgressRef } from "./progress";
 import { smoothstep, stageLocal } from "./stages";
 import {
-  TARGET_SPAN,
+  BUILDING_CENTER,
+  BUILDING_SCALE,
+  BUILDING_SIZE,
   buildingMetrics,
   floorBeat,
   floorSlabY,
 } from "./building";
-import modelAsset from "@/assets/mars_chua_floors.gltf.asset.json";
+import modelAsset from "@/assets/mars_chua_floors_v2.gltf.asset.json";
+
 
 // Node names in the split GLTF (bottom → top).
 const FLOOR_NODES = ["GroundFloor", "Floor2", "Floor3", "Floor4", "Roof"] as const;
@@ -68,10 +71,18 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
   const hedgesRef = useRef<THREE.Group>(null);
   const seamsRef = useRef<THREE.Group>(null);
 
-  // Build a normalized scene: clone, center on origin, scale to fit,
-  // and collect handles to each named floor node with its resting Y.
+  // Build a normalized scene: clone, drop the oversized site slab, center the
+  // real building on the origin, scale it to fit, and collect handles to each
+  // named floor node with its resting Y.
   const { root, floors, upAxis, riseLocal } = useMemo(() => {
     const cloned = gltf.scene.clone(true);
+
+    // The v2 export separates the huge flat site plane into its own node.
+    // It spans far beyond the building and would wreck both the framing and
+    // the silhouette, so it's removed entirely — the scene already has its own
+    // procedural ground plane.
+    const site = cloned.getObjectByName("SiteGround");
+    site?.parent?.remove(site);
 
     cloned.traverse((obj) => {
       if ((obj as THREE.Mesh).isMesh) {
@@ -81,45 +92,25 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       }
     });
 
-    // SketchUp exports are frequently Z-up: if the "depth" axis is clearly
-    // taller than the Y axis, rotate the model upright first.
-    const raw = new THREE.Box3().setFromObject(cloned);
-    const rawSize = raw.getSize(new THREE.Vector3());
-    const zUp = rawSize.z > rawSize.y * 1.4;
-    if (zUp) {
-      cloned.rotation.x = -Math.PI / 2;
-      cloned.updateMatrixWorld(true);
-    }
-    // After rotation, local +Z maps to world +Y — that's the axis floors rise on.
-    const upAxis: "y" | "z" = zUp ? "z" : "y";
+    // The GLTF is Y-up (measured height 14.15 m on the y axis), so no
+    // orientation fix is needed and floors rise along local +Y.
+    const upAxis: "y" | "z" = "y";
 
-    // Compute overall bounds to normalize scale/position for the camera rig.
-    const bbox = new THREE.Box3().setFromObject(cloned);
-    const size = new THREE.Vector3();
-    const center = new THREE.Vector3();
-    bbox.getSize(size);
-    bbox.getCenter(center);
-
-    // Fit the longest horizontal span (this is a wide multi-unit block, so
-    // fitting by height alone would leave it far too large for the rig).
-    const span = Math.max(size.x, size.z);
-    const scale = span > 0.001 ? TARGET_SPAN / span : 1;
-
+    // Use the MEASURED building box (see building.ts) rather than an
+    // auto-computed Box3: the height-split floor nodes all share one position
+    // accessor, so their reported bounds are the whole-site box.
+    const scale = BUILDING_SCALE;
     cloned.scale.setScalar(scale);
-    // Recenter horizontally on origin, and drop the base to y=0.
-    cloned.position.set(-center.x * scale, -bbox.min.y * scale, -center.z * scale);
+    // Recenter the real building footprint on the origin, base at y = 0.
+    cloned.position.set(
+      -BUILDING_CENTER.x * scale,
+      0,
+      -BUILDING_CENTER.z * scale,
+    );
 
-    // Publish real fitted metrics for the camera rig + structural skeleton.
-    buildingMetrics.height = size.y * scale;
-    buildingMetrics.width = size.x * scale;
-    buildingMetrics.depth = size.z * scale;
-    buildingMetrics.centerY = buildingMetrics.height / 2;
-    buildingMetrics.radius = Math.max(buildingMetrics.width, buildingMetrics.depth) / 2;
+    // Rise distance in the model's own (pre-scale) units.
+    const riseLocal = BUILDING_SIZE.y;
 
-
-    // Rise distance in the model's own (pre-scale) units so it reads the same
-    // regardless of how large the source model is.
-    const riseLocal = size.y / scale;
 
     // Find each named floor node and record its resting position on the up axis.
     type FloorHandle = {
@@ -219,8 +210,8 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       [1, 2, 3, 4].map((i) => ({
         stage: i,
         y: floorSlabY(i),
-        w: buildingMetrics.width * 1.005,
-        d: buildingMetrics.depth * 1.005,
+        w: buildingMetrics.width * 0.995,
+        d: buildingMetrics.depth * 0.995,
       })),
     // Recompute when the model (and thus metrics) changes.
     [floors],
@@ -229,7 +220,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
   const seamMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#1b1e24"),
+        color: new THREE.Color("#4b5361"),
         roughness: 0.9,
         metalness: 0,
         transparent: true,
@@ -260,6 +251,9 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     floors.forEach((f) => {
       const stageIdx = FLOOR_STAGE[f.name];
       const { reveal } = floorBeat(p, stageIdx);
+      // Hide a floor outright until its beat starts: a fully transparent mesh
+      // still writes depth and would occlude the blueprint plan below it.
+      f.node.visible = reveal > 0.001;
       (f.node.position as unknown as Record<string, number>)[upAxis] =
         f.restY - riseLocal * (1 - reveal);
       f.opacityTargets.forEach((t) => {
@@ -275,7 +269,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
         s.visible = reveal > 0.02;
         op = Math.max(op, reveal);
       });
-      seamMat.opacity = op * 0.85;
+      seamMat.opacity = op * 0.3;
     }
 
     // Landscape: ground shifts dirt → grass across the final stage,
@@ -309,9 +303,10 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       </mesh>
 
       {/* Foundation slab under the building, sized to the fitted footprint */}
-      <mesh position={[0, 0.05, 0]} receiveShadow>
+      {/* Sits just below the blueprint plan so it never occludes the drawing. */}
+      <mesh position={[0, -0.06, 0]} receiveShadow>
         <boxGeometry
-          args={[buildingMetrics.width * 1.12, 0.1, buildingMetrics.depth * 1.3]}
+          args={[buildingMetrics.width * 1.04, 0.1, buildingMetrics.depth * 1.06]}
         />
         <meshStandardMaterial color="#1e2530" roughness={1} />
       </mesh>
@@ -324,7 +319,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       <group ref={seamsRef}>
         {seamDefs.map((s) => (
           <mesh key={s.stage} position={[0, s.y, 0]} material={seamMat} visible={false}>
-            <boxGeometry args={[s.w, 0.05, s.d]} />
+            <boxGeometry args={[s.w, 0.03, s.d]} />
           </mesh>
         ))}
       </group>
