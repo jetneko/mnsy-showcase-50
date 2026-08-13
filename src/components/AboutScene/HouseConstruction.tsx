@@ -303,7 +303,8 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       </mesh>
 
       {/* Foundation slab under the building, sized to the fitted footprint */}
-      <mesh position={[0, 0.05, 0]} receiveShadow>
+      {/* Sits just below the blueprint plan so it never occludes the drawing. */}
+      <mesh position={[0, -0.06, 0]} receiveShadow>
         <boxGeometry
           args={[buildingMetrics.width * 1.04, 0.1, buildingMetrics.depth * 1.06]}
         />
