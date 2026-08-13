@@ -28,15 +28,15 @@ type Key = {
 
 const KEYS: Key[] = [
   // 0 — top-down blueprint (still aimed at the plan on the ground)
-  { t: 0.0, dir: [0, 0.001], dist: 0.02, camY: 3.0, lookY: 0.02 },
+  { t: 0.0, dir: [0, 0.001], dist: 0.02, camY: 3.8, lookY: 0.02 },
   // 1 — tilt to high isometric as the ground floor rises
-  { t: 0.22, dir: [0.7, 0.72], dist: 3.5, camY: 1.15, lookY: 0.5 },
+  { t: 0.22, dir: [0.7, 0.72], dist: 4.6, camY: 1.25, lookY: 0.55 },
   // 2 — gentle orbit around the mass, mid-height
-  { t: 0.55, dir: [-0.55, 0.84], dist: 3.2, camY: 0.95, lookY: 0.52 },
+  { t: 0.55, dir: [-0.55, 0.84], dist: 4.3, camY: 1.05, lookY: 0.55 },
   // 3 — three-quarter view as the upper floors settle
-  { t: 0.82, dir: [0.55, 0.84], dist: 3.0, camY: 0.8, lookY: 0.5 },
+  { t: 0.82, dir: [0.55, 0.84], dist: 4.1, camY: 0.9, lookY: 0.55 },
   // 4 — dramatic hero angle, looking slightly up at the mass
-  { t: 1.0, dir: [0.45, 0.89], dist: 2.75, camY: 0.5, lookY: 0.48 },
+  { t: 1.0, dir: [0.5, 0.86], dist: 4.0, camY: 0.72, lookY: 0.52 },
 ];
 
 
