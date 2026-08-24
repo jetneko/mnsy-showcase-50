@@ -65,16 +65,30 @@ export const buildingMetrics: BuildingMetrics = {
 
 
 /**
- * Slab elevations as fractions of total height, from the real elevations
- * detected in the model (0.00 / 3.25 / 6.23 / 9.34 / ~10.9 m of a 14.15 m
- * mass). Index matches stage - 1.
+ * Slab elevations as fractions of total height, MEASURED from the v2 GLTF by
+ * decoding each floor node's own index buffer and taking the vertex Y range
+ * (GroundFloor 0→2.95, Floor2 0→6.35, Floor3/Floor4 2.0→14.15, Roof 9.35→14.15
+ * of a 14.15 m mass). Index matches stage - 1.
  */
-export const FLOOR_FRACTIONS = [0, 0.23, 0.44, 0.66, 0.77] as const;
+export const FLOOR_FRACTIONS = [0, 0.209, 0.449, 0.661, 0.661] as const;
+
+/**
+ * Heights (in scene units) where a floor-line trim band is drawn. These are the
+ * real slab elevations 2.95 / 6.35 / 9.35 m, so the finished mass reads as four
+ * stacked storeys even in the static hero frame at the end of the story.
+ * `stage` is the floor stage that lands on that seam.
+ */
+export const SEAM_LEVELS = [
+  { stage: 2, fraction: 2.95 / 14.15 },
+  { stage: 3, fraction: 6.35 / 14.15 },
+  { stage: 4, fraction: 9.35 / 14.15 },
+] as const;
 
 export function floorSlabY(index: number): number {
   const f = FLOOR_FRACTIONS[Math.min(index, FLOOR_FRACTIONS.length - 1)];
   return f * buildingMetrics.height;
 }
+
 
 
 function clamp01(x: number) {

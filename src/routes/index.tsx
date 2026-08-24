@@ -156,19 +156,35 @@ function Hero() {
             </a>
           </div>
         </div>
-        <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-[60%] md:block">
-          {showcase.map((src, i) => (
-            <img
-              key={src}
-              src={src}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-[1500ms] ease-in-out"
-              style={{ opacity: i === activeIdx ? 1 : 0 }}
-            />
-          ))}
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-deep via-brand-navy-deep/70 to-transparent" />
-          <div className="absolute inset-0 bg-brand-navy-deep/30" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-[60%] overflow-hidden bg-brand-navy-deep md:block">
+          {/* Every slide stays mounted and absolutely stacked in the same box.
+              The outgoing image is held fully opaque underneath while the
+              incoming one fades in on top, so the crossfade never dips to a
+              partially transparent frame (which showed the container edge as a
+              flash at the image border). */}
+          {showcase.map((src, i) => {
+            const isActive = i === activeIdx;
+            const isPrev = i === (activeIdx - 1 + showcase.length) % showcase.length;
+            return (
+              <img
+                key={src}
+                src={src}
+                alt=""
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover transition-opacity duration-[1500ms] ease-in-out"
+                style={{
+                  opacity: isActive || isPrev ? 1 : 0,
+                  zIndex: isActive ? 2 : isPrev ? 1 : 0,
+                  transitionDuration: isActive ? "1500ms" : "0ms",
+                  transitionDelay: isActive ? "0ms" : "1500ms",
+                }}
+              />
+            );
+          })}
+          <div className="absolute inset-0 z-[3] bg-gradient-to-r from-brand-navy-deep via-brand-navy-deep/70 to-transparent" />
+          <div className="absolute inset-0 z-[3] bg-brand-navy-deep/30" />
         </div>
+
       </div>
     </section>
   );

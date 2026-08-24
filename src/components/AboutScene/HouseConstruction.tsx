@@ -10,7 +10,7 @@ import {
   BUILDING_SIZE,
   buildingMetrics,
   floorBeat,
-  floorSlabY,
+  SEAM_LEVELS,
 } from "./building";
 import modelAsset from "@/assets/mars_chua_floors_v2.gltf.asset.json";
 
@@ -203,15 +203,16 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
   }, [floors, upAxis, riseLocal]);
 
 
-  // Thin trim strips at each floor-to-floor seam — reads as an intentional
-  // floor line / shadow gap rather than a geometry glitch.
+  // Thin trim bands at each real slab elevation (2.95 / 6.35 / 9.35 m). These
+  // stay visible once their floor has landed so the finished building still
+  // reads as four stacked storeys in the final static hero frame.
   const seamDefs = useMemo(
     () =>
-      [1, 2, 3, 4].map((i) => ({
-        stage: i,
-        y: floorSlabY(i),
-        w: buildingMetrics.width * 0.995,
-        d: buildingMetrics.depth * 0.995,
+      SEAM_LEVELS.map((s) => ({
+        stage: s.stage,
+        y: s.fraction * buildingMetrics.height,
+        w: buildingMetrics.width * 0.99,
+        d: buildingMetrics.depth * 0.99,
       })),
     // Recompute when the model (and thus metrics) changes.
     [floors],
@@ -220,14 +221,15 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
   const seamMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#4b5361"),
-        roughness: 0.9,
-        metalness: 0,
+        color: new THREE.Color("#2b3038"),
+        roughness: 0.85,
+        metalness: 0.15,
         transparent: true,
         opacity: 0,
       }),
     [],
   );
+
 
   // Hedge positions along the front edge — derived from the fitted footprint.
   const hedgeDefs = useMemo(() => {
@@ -261,7 +263,8 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       });
     });
 
-    // Seam strips appear with the floor that lands on them.
+    // Seam bands appear with the floor that lands on them and then STAY —
+    // they are what makes the finished mass read as four distinct storeys.
     if (seamsRef.current) {
       let op = 0;
       seamsRef.current.children.forEach((s, i) => {
@@ -269,8 +272,9 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
         s.visible = reveal > 0.02;
         op = Math.max(op, reveal);
       });
-      seamMat.opacity = op * 0.3;
+      seamMat.opacity = op * 0.7;
     }
+
 
     // Landscape: ground shifts dirt → grass across the final stage,
     // hedges pop in around the base.
@@ -319,7 +323,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       <group ref={seamsRef}>
         {seamDefs.map((s) => (
           <mesh key={s.stage} position={[0, s.y, 0]} material={seamMat} visible={false}>
-            <boxGeometry args={[s.w, 0.03, s.d]} />
+            <boxGeometry args={[s.w, 0.05, s.d]} />
           </mesh>
         ))}
       </group>
