@@ -41,16 +41,24 @@ export function StructuralSkeleton({ mobile }: { mobile: boolean }) {
   }, [columnMat]);
 
   // One group per floor; each holds its columns and beams.
+  const BEAM = 0.14; // beam section (also the column/beam overlap)
+
   const floors = useMemo(() => {
-    const w = buildingMetrics.width * 0.86;
-    const d = buildingMetrics.depth * 0.86;
+    // Perimeter inset from the fitted footprint so columns sit just inside the
+    // real facade rather than floating outside it.
+    const w = buildingMetrics.width - 0.9;
+    const d = buildingMetrics.depth - 0.9;
     const nx = mobile ? 3 : BAYS_X;
     const nz = mobile ? 2 : BAYS_Z;
 
     return FLOOR_STAGES.map((stage, i) => {
       const baseY = floorSlabY(i);
-      const topY = floorSlabY(i + 1) || buildingMetrics.height;
-      const h = Math.max(0.6, topY - baseY);
+      const topY = floorSlabY(i + 1);
+      const storey = Math.max(0.8, topY - baseY);
+      // Columns run from the slab below up to the underside of the beam ring,
+      // and sink 0.04 into the slab so there is never a visible gap.
+      const h = storey - BEAM + 0.04;
+      const colBase = baseY - 0.04;
 
       const columns: { pos: [number, number, number] }[] = [];
       for (let ix = 0; ix < nx; ix++) {
@@ -60,20 +68,23 @@ export function StructuralSkeleton({ mobile }: { mobile: boolean }) {
           // Interior columns only on the perimeter for a cleaner read.
           const perimeter = ix === 0 || ix === nx - 1 || iz === 0 || iz === nz - 1;
           if (!perimeter) continue;
-          columns.push({ pos: [x, baseY, z] });
+          columns.push({ pos: [x, colBase, z] });
         }
       }
 
+      // Beam ring sits directly on the column tops, its top face flush with
+      // this floor's slab elevation.
       const beams: { pos: [number, number, number]; scale: [number, number, number] }[] = [];
-      const beamY = topY;
-      beams.push({ pos: [0, beamY, -d / 2], scale: [w, 0.12, 0.12] });
-      beams.push({ pos: [0, beamY, d / 2], scale: [w, 0.12, 0.12] });
-      beams.push({ pos: [-w / 2, beamY, 0], scale: [0.12, 0.12, d] });
-      beams.push({ pos: [w / 2, beamY, 0], scale: [0.12, 0.12, d] });
+      const beamY = topY - BEAM / 2;
+      beams.push({ pos: [0, beamY, -d / 2], scale: [w + BEAM, BEAM, BEAM] });
+      beams.push({ pos: [0, beamY, d / 2], scale: [w + BEAM, BEAM, BEAM] });
+      beams.push({ pos: [-w / 2, beamY, 0], scale: [BEAM, BEAM, d + BEAM] });
+      beams.push({ pos: [w / 2, beamY, 0], scale: [BEAM, BEAM, d + BEAM] });
 
-      return { stage, baseY, h, columns, beams };
+      return { stage, baseY: colBase, h, columns, beams };
     });
   }, [mobile]);
+
 
   const groupRefs = useRef<(THREE.Group | null)[]>([]);
 
