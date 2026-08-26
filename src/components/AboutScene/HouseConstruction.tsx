@@ -328,11 +328,12 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       {/* Floor-line trim strips at each height-split seam. */}
       <group ref={seamsRef}>
         {seamDefs.map((s) => (
-          <mesh key={s.stage} position={[0, s.y, 0]} material={seamMat} visible={false}>
-            <boxGeometry args={[s.w, 0.05, s.d]} />
+          <mesh key={s.stage} position={[0, s.y, 0]} material={seamMat} visible={false} castShadow>
+            <boxGeometry args={[s.w, 0.12, s.d]} />
           </mesh>
         ))}
       </group>
+
 
       {/* Hedges — landscape stage */}
       <group ref={hedgesRef}>
