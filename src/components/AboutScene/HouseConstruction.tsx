@@ -139,14 +139,15 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
           const std = m.clone() as THREE.MeshStandardMaterial;
           const kind = classify(m.name ?? "");
 
-          std.transparent = true;
+          // Opaque by default: partially transparent multi-shell CAD geometry
+          // sorts badly and reads as jagged shards mid-rise. Each floor now
+          // slides in as a solid, complete piece.
+          std.transparent = false;
+          std.depthWrite = true;
+          std.side = THREE.DoubleSide;
           std.metalness = 0;
           std.envMapIntensity = 1.0;
-          // Push each floor's faces slightly apart in depth so coplanar
-          // triangles from neighbouring bins don't fight for the same pixels.
-          std.polygonOffset = true;
-          std.polygonOffsetFactor = -1 - floorIdx;
-          std.polygonOffsetUnits = -1;
+
 
           switch (kind) {
             case "glass":
@@ -154,8 +155,12 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
               std.roughness = 0.12;
               std.metalness = 0.35;
               std.envMapIntensity = 1.6;
+              std.transparent = true;
+              std.depthWrite = false;
+              std.side = THREE.FrontSide;
               std.opacity = 0.55;
               break;
+
             case "stone":
               std.color = new THREE.Color(COLOR_SANDSTONE);
               std.roughness = 0.82;
@@ -190,17 +195,16 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     return { root: cloned, floors: found, upAxis, riseLocal };
   }, [gltf.scene]);
 
-  // Set every floor to its below-ground start position on first mount so
-  // there's no flash of the whole building before scroll begins.
+  // Park every floor below ground and hide it on first mount so there's no
+  // flash of the whole building before scroll begins.
   useEffect(() => {
     floors.forEach((f) => {
+      f.node.visible = false;
       (f.node.position as unknown as Record<string, number>)[upAxis] =
         f.restY - riseLocal;
-      f.opacityTargets.forEach((t) => {
-        (t.mat as THREE.MeshStandardMaterial).opacity = 0;
-      });
     });
   }, [floors, upAxis, riseLocal]);
+
 
 
   // Thin trim bands at each real slab elevation (2.95 / 6.35 / 9.35 m). These
@@ -253,15 +257,13 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     floors.forEach((f) => {
       const stageIdx = FLOOR_STAGE[f.name];
       const { reveal } = floorBeat(p, stageIdx);
-      // Hide a floor outright until its beat starts: a fully transparent mesh
-      // still writes depth and would occlude the blueprint plan below it.
+      // Solid, opaque piece: it stays fully rendered and simply slides up into
+      // place — no per-triangle fade that would read as jagged shards.
       f.node.visible = reveal > 0.001;
       (f.node.position as unknown as Record<string, number>)[upAxis] =
         f.restY - riseLocal * (1 - reveal);
-      f.opacityTargets.forEach((t) => {
-        (t.mat as THREE.MeshStandardMaterial).opacity = t.original * reveal;
-      });
     });
+
 
     // Seam bands appear with the floor that lands on them and then STAY —
     // they are what makes the finished mass read as four distinct storeys.
