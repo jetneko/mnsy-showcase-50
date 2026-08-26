@@ -274,14 +274,12 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     // Seam bands appear with the floor that lands on them and then STAY —
     // they are what makes the finished mass read as four distinct storeys.
     if (seamsRef.current) {
-      let op = 0;
       seamsRef.current.children.forEach((s, i) => {
         const { reveal } = floorBeat(p, seamDefs[i].stage);
-        s.visible = reveal > 0.02;
-        op = Math.max(op, reveal);
+        s.visible = reveal > 0.35;
       });
-      seamMat.opacity = op * 0.7;
     }
+
 
 
     // Landscape: ground shifts dirt → grass across the final stage,
