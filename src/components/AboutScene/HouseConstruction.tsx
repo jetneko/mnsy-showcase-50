@@ -155,8 +155,12 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
               std.roughness = 0.12;
               std.metalness = 0.35;
               std.envMapIntensity = 1.6;
+              std.transparent = true;
+              std.depthWrite = false;
+              std.side = THREE.FrontSide;
               std.opacity = 0.55;
               break;
+
             case "stone":
               std.color = new THREE.Color(COLOR_SANDSTONE);
               std.roughness = 0.82;
