@@ -257,15 +257,13 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     floors.forEach((f) => {
       const stageIdx = FLOOR_STAGE[f.name];
       const { reveal } = floorBeat(p, stageIdx);
-      // Hide a floor outright until its beat starts: a fully transparent mesh
-      // still writes depth and would occlude the blueprint plan below it.
+      // Solid, opaque piece: it stays fully rendered and simply slides up into
+      // place — no per-triangle fade that would read as jagged shards.
       f.node.visible = reveal > 0.001;
       (f.node.position as unknown as Record<string, number>)[upAxis] =
         f.restY - riseLocal * (1 - reveal);
-      f.opacityTargets.forEach((t) => {
-        (t.mat as THREE.MeshStandardMaterial).opacity = t.original * reveal;
-      });
     });
+
 
     // Seam bands appear with the floor that lands on them and then STAY —
     // they are what makes the finished mass read as four distinct storeys.
