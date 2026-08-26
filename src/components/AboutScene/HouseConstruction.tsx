@@ -195,17 +195,16 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     return { root: cloned, floors: found, upAxis, riseLocal };
   }, [gltf.scene]);
 
-  // Set every floor to its below-ground start position on first mount so
-  // there's no flash of the whole building before scroll begins.
+  // Park every floor below ground and hide it on first mount so there's no
+  // flash of the whole building before scroll begins.
   useEffect(() => {
     floors.forEach((f) => {
+      f.node.visible = false;
       (f.node.position as unknown as Record<string, number>)[upAxis] =
         f.restY - riseLocal;
-      f.opacityTargets.forEach((t) => {
-        (t.mat as THREE.MeshStandardMaterial).opacity = 0;
-      });
     });
   }, [floors, upAxis, riseLocal]);
+
 
 
   // Thin trim bands at each real slab elevation (2.95 / 6.35 / 9.35 m). These
