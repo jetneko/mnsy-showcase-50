@@ -122,8 +122,20 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     const found: FloorHandle[] = [];
     FLOOR_NODES.forEach((name, floorIdx) => {
       const node = cloned.getObjectByName(name);
-      if (!node) return;
+      if (!node) {
+        console.warn(`[AboutScene] floor node "${name}" is missing from the GLTF`);
+        return;
+      }
+      // Flag an empty height-bin split (node exists but carries no drawable mesh).
+      let meshCount = 0;
+      node.traverse((o) => {
+        if ((o as THREE.Mesh).isMesh) meshCount++;
+      });
+      if (meshCount === 0) {
+        console.warn(`[AboutScene] floor node "${name}" has no meshes (empty height bin)`);
+      }
       const restY = node.position[upAxis];
+
 
       const opacityTargets: FloorHandle["opacityTargets"] = [];
       node.traverse((obj) => {
