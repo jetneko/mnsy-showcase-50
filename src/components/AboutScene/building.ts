@@ -65,12 +65,22 @@ export const buildingMetrics: BuildingMetrics = {
 
 
 /**
- * Slab elevations as fractions of total height, MEASURED from the v2 GLTF by
- * decoding each floor node's own index buffer and taking the vertex Y range
- * (GroundFloor 0→2.95, Floor2 0→6.35, Floor3/Floor4 2.0→14.15, Roof 9.35→14.15
- * of a 14.15 m mass). Index matches stage - 1.
+ * Slab boundary elevations as fractions of total height, measured from the v2
+ * GLTF (2.95 / 6.35 / 9.35 m slabs on a 14.15 m mass, plus a roof deck).
+ * There are 6 boundaries for 5 stacked pieces, so piece `i` spans
+ * SLAB_FRACTIONS[i] → SLAB_FRACTIONS[i + 1] with no zero-height gaps.
  */
-export const FLOOR_FRACTIONS = [0, 0.209, 0.449, 0.661, 0.661] as const;
+export const SLAB_FRACTIONS = [
+  0,
+  2.95 / 14.15,
+  6.35 / 14.15,
+  9.35 / 14.15,
+  12.75 / 14.15,
+  1,
+] as const;
+
+/** Back-compat alias: base elevation of each floor piece. */
+export const FLOOR_FRACTIONS = SLAB_FRACTIONS.slice(0, 5);
 
 /**
  * Heights (in scene units) where a floor-line trim band is drawn. These are the
@@ -84,10 +94,12 @@ export const SEAM_LEVELS = [
   { stage: 4, fraction: 9.35 / 14.15 },
 ] as const;
 
+/** Elevation (scene units) of slab boundary `index` (0 = ground). */
 export function floorSlabY(index: number): number {
-  const f = FLOOR_FRACTIONS[Math.min(index, FLOOR_FRACTIONS.length - 1)];
+  const f = SLAB_FRACTIONS[Math.min(index, SLAB_FRACTIONS.length - 1)];
   return f * buildingMetrics.height;
 }
+
 
 
 
