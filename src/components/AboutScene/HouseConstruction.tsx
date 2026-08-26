@@ -139,14 +139,15 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
           const std = m.clone() as THREE.MeshStandardMaterial;
           const kind = classify(m.name ?? "");
 
-          std.transparent = true;
+          // Opaque by default: partially transparent multi-shell CAD geometry
+          // sorts badly and reads as jagged shards mid-rise. Each floor now
+          // slides in as a solid, complete piece.
+          std.transparent = false;
+          std.depthWrite = true;
+          std.side = THREE.DoubleSide;
           std.metalness = 0;
           std.envMapIntensity = 1.0;
-          // Push each floor's faces slightly apart in depth so coplanar
-          // triangles from neighbouring bins don't fight for the same pixels.
-          std.polygonOffset = true;
-          std.polygonOffsetFactor = -1 - floorIdx;
-          std.polygonOffsetUnits = -1;
+
 
           switch (kind) {
             case "glass":
