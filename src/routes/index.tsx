@@ -170,17 +170,27 @@ function Hero() {
                 key={src}
                 src={src}
                 alt=""
-                decoding="async"
-                className="absolute inset-0 h-full w-full object-cover transition-opacity duration-[1500ms] ease-in-out"
+                loading="eager"
+                decoding="sync"
+                className="absolute inset-0 h-full w-full object-cover"
                 style={{
+                  // Both the outgoing and incoming frame are opaque and stacked,
+                  // so no partially transparent state can expose the container
+                  // edge. Only the incoming layer animates.
                   opacity: isActive || isPrev ? 1 : 0,
                   zIndex: isActive ? 2 : isPrev ? 1 : 0,
+                  transitionProperty: "opacity",
+                  transitionTimingFunction: "ease-in-out",
                   transitionDuration: isActive ? "1500ms" : "0ms",
                   transitionDelay: isActive ? "0ms" : "1500ms",
+                  willChange: "opacity",
+                  transform: "translateZ(0)",
+                  backfaceVisibility: "hidden",
                 }}
               />
             );
           })}
+
           <div className="absolute inset-0 z-[3] bg-gradient-to-r from-brand-navy-deep via-brand-navy-deep/70 to-transparent" />
           <div className="absolute inset-0 z-[3] bg-brand-navy-deep/30" />
         </div>
