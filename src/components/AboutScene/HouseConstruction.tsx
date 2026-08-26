@@ -215,8 +215,11 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       SEAM_LEVELS.map((s) => ({
         stage: s.stage,
         y: s.fraction * buildingMetrics.height,
-        w: buildingMetrics.width * 0.99,
-        d: buildingMetrics.depth * 0.99,
+        // Slightly PROUD of the footprint so the band reads as a recessed
+        // shadow/trim line from every angle instead of being swallowed by
+        // coplanar wall faces.
+        w: buildingMetrics.width * 1.012,
+        d: buildingMetrics.depth * 1.012,
       })),
     // Recompute when the model (and thus metrics) changes.
     [floors],
@@ -225,14 +228,17 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
   const seamMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#2b3038"),
-        roughness: 0.85,
-        metalness: 0.15,
-        transparent: true,
-        opacity: 0,
+        color: new THREE.Color("#20242b"),
+        roughness: 0.9,
+        metalness: 0.1,
+        // Fully opaque: a transparent band sorted behind the opaque wall shells
+        // was invisible in the final frame, which is why the mass read as one
+        // merged volume.
+        transparent: false,
       }),
     [],
   );
+
 
 
   // Hedge positions along the front edge — derived from the fitted footprint.
