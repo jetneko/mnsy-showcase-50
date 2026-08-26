@@ -122,8 +122,20 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     const found: FloorHandle[] = [];
     FLOOR_NODES.forEach((name, floorIdx) => {
       const node = cloned.getObjectByName(name);
-      if (!node) return;
+      if (!node) {
+        console.warn(`[AboutScene] floor node "${name}" is missing from the GLTF`);
+        return;
+      }
+      // Flag an empty height-bin split (node exists but carries no drawable mesh).
+      let meshCount = 0;
+      node.traverse((o) => {
+        if ((o as THREE.Mesh).isMesh) meshCount++;
+      });
+      if (meshCount === 0) {
+        console.warn(`[AboutScene] floor node "${name}" has no meshes (empty height bin)`);
+      }
       const restY = node.position[upAxis];
+
 
       const opacityTargets: FloorHandle["opacityTargets"] = [];
       node.traverse((obj) => {
@@ -215,8 +227,11 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       SEAM_LEVELS.map((s) => ({
         stage: s.stage,
         y: s.fraction * buildingMetrics.height,
-        w: buildingMetrics.width * 0.99,
-        d: buildingMetrics.depth * 0.99,
+        // Slightly PROUD of the footprint so the band reads as a recessed
+        // shadow/trim line from every angle instead of being swallowed by
+        // coplanar wall faces.
+        w: buildingMetrics.width * 1.012,
+        d: buildingMetrics.depth * 1.012,
       })),
     // Recompute when the model (and thus metrics) changes.
     [floors],
@@ -225,14 +240,17 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
   const seamMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#2b3038"),
-        roughness: 0.85,
-        metalness: 0.15,
-        transparent: true,
-        opacity: 0,
+        color: new THREE.Color("#20242b"),
+        roughness: 0.9,
+        metalness: 0.1,
+        // Fully opaque: a transparent band sorted behind the opaque wall shells
+        // was invisible in the final frame, which is why the mass read as one
+        // merged volume.
+        transparent: false,
       }),
     [],
   );
+
 
 
   // Hedge positions along the front edge — derived from the fitted footprint.
@@ -268,14 +286,12 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     // Seam bands appear with the floor that lands on them and then STAY —
     // they are what makes the finished mass read as four distinct storeys.
     if (seamsRef.current) {
-      let op = 0;
       seamsRef.current.children.forEach((s, i) => {
         const { reveal } = floorBeat(p, seamDefs[i].stage);
-        s.visible = reveal > 0.02;
-        op = Math.max(op, reveal);
+        s.visible = reveal > 0.35;
       });
-      seamMat.opacity = op * 0.7;
     }
+
 
 
     // Landscape: ground shifts dirt → grass across the final stage,
@@ -324,11 +340,12 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       {/* Floor-line trim strips at each height-split seam. */}
       <group ref={seamsRef}>
         {seamDefs.map((s) => (
-          <mesh key={s.stage} position={[0, s.y, 0]} material={seamMat} visible={false}>
-            <boxGeometry args={[s.w, 0.05, s.d]} />
+          <mesh key={s.stage} position={[0, s.y, 0]} material={seamMat} visible={false} castShadow>
+            <boxGeometry args={[s.w, 0.12, s.d]} />
           </mesh>
         ))}
       </group>
+
 
       {/* Hedges — landscape stage */}
       <group ref={hedgesRef}>
