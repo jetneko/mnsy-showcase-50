@@ -27,19 +27,20 @@ type Key = {
 };
 
 const KEYS: Key[] = [
-  // 0 — top-down blueprint (still aimed at the plan on the ground)
-  { t: 0.0, dir: [0, 0.001], dist: 0.02, camY: 3.8, lookY: 0.02 },
-  // 1 — tilt to high isometric as the ground floor rises
-  { t: 0.22, dir: [0.7, 0.72], dist: 6.2, camY: 1.3, lookY: 0.5 },
-  // 2 — gentle orbit around the mass, mid-height
-  { t: 0.55, dir: [-0.55, 0.84], dist: 5.9, camY: 1.15, lookY: 0.5 },
-  // 3 — three-quarter view as the upper floors settle
-  { t: 0.82, dir: [0.55, 0.84], dist: 5.7, camY: 1.0, lookY: 0.5 },
-  // 4 — dramatic hero angle: far enough back that all four storeys and the
-  // roof line sit inside the frame at once.
-  { t: 1.0, dir: [0.5, 0.86], dist: 5.5, camY: 0.85, lookY: 0.48 },
-
+  // 0 — top-down blueprint (aimed at the plan on the ground)
+  { t: 0.0, dir: [0, 0.001], dist: 0.02, camY: 3.9, lookY: 0.02 },
+  // 1 — tilt to high isometric as the floor plate rises
+  { t: 0.16, dir: [0.7, 0.72], dist: 6.4, camY: 1.35, lookY: 0.45 },
+  // 2 — structure beat: pull back so the full-height frame fits
+  { t: 0.34, dir: [0.35, 0.94], dist: 6.2, camY: 1.15, lookY: 0.52 },
+  // 3 — gentle orbit as walls and windows go in
+  { t: 0.62, dir: [-0.6, 0.8], dist: 6.0, camY: 1.05, lookY: 0.52 },
+  // 4 — three-quarter view for the roof and finish beats
+  { t: 0.85, dir: [0.55, 0.84], dist: 5.9, camY: 0.95, lookY: 0.5 },
+  // 5 — hero angle: the whole 14.15 m mass sits inside the frame
+  { t: 1.0, dir: [0.52, 0.86], dist: 5.6, camY: 0.8, lookY: 0.48 },
 ];
+
 
 
 function ease(x: number) {
