@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useProgressRef } from "./progress";
-import { smoothstep, stageLocal } from "./stages";
+import { smoothstep, stageLocal, STAGE } from "./stages";
 
 /**
  * Lighting shifts from cool blueprint-blue in early stages to a warm
@@ -17,8 +17,11 @@ export function Lighting({ mobile }: { mobile: boolean }) {
 
   useFrame(() => {
     const p = progress.current;
-    // Warm-shift ramps up after stage 4 (roof on) and completes by stage 7.
-    const warm = smoothstep(stageLocal(p, 4)) * 0.35 + smoothstep(stageLocal(p, 5)) * 0.65;
+    // Warm-shift starts as the roof closes (stage 6 of 8) and completes over
+    // the exterior-finish beat (STAGE.FINISH), then holds for handover.
+    const warm =
+      smoothstep(stageLocal(p, STAGE.ROOF)) * 0.3 +
+      smoothstep(stageLocal(p, STAGE.FINISH)) * 0.7;
     if (keyRef.current) {
       const cool = new THREE.Color("#7ec8ff");
       const golden = new THREE.Color("#ffd39a");
