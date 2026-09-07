@@ -1,9 +1,29 @@
 import { useEffect, useRef, useState } from "react";
 import { STAGES, STAGE_COUNT } from "./stages";
-import { Ruler, Building, Building2, Layers, Sparkles, KeyRound, type LucideIcon } from "lucide-react";
+import {
+  Ruler,
+  Square,
+  Frame,
+  Building,
+  Blinds,
+  Layers,
+  Sparkles,
+  KeyRound,
+  type LucideIcon,
+} from "lucide-react";
 import type { ProgressRef } from "./progress";
 
-const STAGE_ICONS: LucideIcon[] = [Ruler, Building, Building2, Layers, Sparkles, KeyRound];
+// One icon per stage in stages.ts (8 total).
+const STAGE_ICONS: LucideIcon[] = [
+  Ruler, // 01 Blueprint
+  Square, // 02 Foundation
+  Frame, // 03 Structure
+  Building, // 04 Walls
+  Blinds, // 05 Windows
+  Layers, // 06 Roof
+  Sparkles, // 07 Finishes
+  KeyRound, // 08 Handover
+];
 
 /**
  * DOM overlay: current stage copy on the left, vertical stepper on the right.
