@@ -71,6 +71,24 @@ export function partReveal(p: number, stageIndex: number): number {
   return smoothstep(clamp01((local - REVEAL_START) / (REVEAL_END - REVEAL_START)));
 }
 
+/** Raw 0→1 ramp for a stage, without the smoothstep easing. */
+export function partRamp(p: number, stageIndex: number): number {
+  const local = stageLocal(p, stageIndex);
+  return clamp01((local - REVEAL_START) / (REVEAL_END - REVEAL_START));
+}
+
+/** Overshoot-and-settle ease — gives a heavy piece weight on landing. */
+export function easeOutBack(x: number, overshoot = 1.35): number {
+  const t = clamp01(x) - 1;
+  const c = overshoot;
+  return 1 + (c + 1) * t * t * t + c * t * t;
+}
+
+/** Quick snap with a small overshoot — used for window panes clicking in. */
+export function easeSnap(x: number): number {
+  return easeOutBack(x, 1.9);
+}
+
 export type SkeletonBeat = {
   /** 0→1 columns rising from the ground to the roof line. */
   columns: number;
