@@ -58,7 +58,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
 
   // Normalize the scene: clone, center the real building on the origin with its
   // base at y=0, scale it to fit the camera rig, and collect a handle per part.
-  const { root, parts, glassMats, riseLocal, wallClip, panes } = useMemo(() => {
+  const { root, parts, glassMats, riseLocal, wallClip, panes, wallMats } = useMemo(() => {
     const cloned = gltf.scene.clone(true);
 
     const scale = BUILDING_SCALE;
@@ -77,6 +77,9 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     const wallClip = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
     type Pane = { mesh: THREE.Mesh; rest: THREE.Vector3; delay: number };
     const panes: Pane[] = [];
+    // Cloned wall materials, so the cut edge can be double-sided mid-build and
+    // returned to its authored (single-sided) state once the walls are whole.
+    const wallMats: { mat: THREE.MeshStandardMaterial; side: THREE.Side }[] = [];
 
     PART_NODES.forEach((name, idx) => {
       const node = cloned.getObjectByName(name);
