@@ -158,7 +158,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       found.push({ name, node, restY: node.position.y });
     });
 
-    return { root: cloned, parts: found, glassMats, riseLocal, wallClip, panes };
+    return { root: cloned, parts: found, glassMats, riseLocal, wallClip, panes, wallMats };
   }, [gltf.scene]);
 
   // Park every part out of frame and hide it on mount so there's no flash of
@@ -205,6 +205,16 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
           part.node.visible = ramp > 0.001;
           // World height of the wall top (base sits at y=0).
           wallClip.constant = buildingMetrics.height * 1.02 * smoothstep(ramp);
+          // Mid-build the cut edge is open, so render both faces; once the
+          // walls are whole, restore each material's authored sidedness.
+          const cutting = ramp > 0.001 && ramp < 0.999;
+          wallMats.forEach(({ mat, side }) => {
+            const want = cutting ? THREE.DoubleSide : side;
+            if (mat.side !== want) {
+              mat.side = want;
+              mat.needsUpdate = true;
+            }
+          });
           break;
         }
         case "WINDOWS": {
