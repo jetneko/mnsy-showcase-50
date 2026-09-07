@@ -115,6 +115,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
           const wallMat = std.clone();
           wallMat.clippingPlanes = [wallClip];
           wallMat.clipShadows = true;
+          wallMats.push({ mat: wallMat, side: std.side });
           wallMat.side = THREE.DoubleSide;
           wallMat.needsUpdate = true;
           return wallMat;
