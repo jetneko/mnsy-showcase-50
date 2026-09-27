@@ -1,0 +1,3 @@
+- [x] Verify eight-step timeline and Finishes light timing.
+- [x] Verify distinct floor, wall, window, and roof animations; reduce exposed wall backfaces while clipped.
+- [ ] Validate desktop and mobile construction views after changes.

@@ -9,7 +9,7 @@ import type * as THREE from "three";
 export function Effects({ mobile }: { mobile: boolean }) {
   if (mobile) return null;
   return (
-    <EffectComposer multisampling={0}>
+    <EffectComposer multisampling={0} enableNormalPass>
       <Bloom
         intensity={0.5}
         luminanceThreshold={0.7}

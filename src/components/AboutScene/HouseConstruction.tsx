@@ -58,7 +58,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
 
   // Normalize the scene: clone, center the real building on the origin with its
   // base at y=0, scale it to fit the camera rig, and collect a handle per part.
-  const { root, parts, glassMats, riseLocal, wallClip, panes, wallMats } = useMemo(() => {
+  const { root, parts, glassMats, riseLocal, wallClip, panes } = useMemo(() => {
     const cloned = gltf.scene.clone(true);
 
     const scale = BUILDING_SCALE;
@@ -77,9 +77,6 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     const wallClip = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
     type Pane = { mesh: THREE.Mesh; rest: THREE.Vector3; delay: number };
     const panes: Pane[] = [];
-    // Cloned wall materials, so the cut edge can be double-sided mid-build and
-    // returned to its authored (single-sided) state once the walls are whole.
-    const wallMats: { mat: THREE.MeshStandardMaterial; side: THREE.Side }[] = [];
 
     PART_NODES.forEach((name, idx) => {
       const node = cloned.getObjectByName(name);
@@ -109,14 +106,12 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
             if (!glassMats.includes(std)) glassMats.push(std);
           }
           if (name !== "WALLS") return std;
-          // Wall materials are cloned so the clip plane can never leak onto a
-          // material shared with another part. DoubleSide keeps the open cut
-          // edge from showing straight through the un-capped shell.
+          // Isolate the clipping plane from materials used by other parts.
+          // Retain authored sidedness: rendering backfaces on this uncapped
+          // mesh would make the inside of the open cut much more apparent.
           const wallMat = std.clone();
           wallMat.clippingPlanes = [wallClip];
           wallMat.clipShadows = true;
-          wallMats.push({ mat: wallMat, side: std.side });
-          wallMat.side = THREE.DoubleSide;
           wallMat.needsUpdate = true;
           return wallMat;
         });
@@ -132,7 +127,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
           const geo = mesh.geometry.clone();
           geo.computeBoundingBox();
           const c = new THREE.Vector3();
-          geo.boundingBox!.getCenter(c);
+          geo.boundingBox?.getCenter(c);
           geo.translate(-c.x, -c.y, -c.z);
           mesh.geometry = geo;
           const offset = c
@@ -145,8 +140,8 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
         });
         // Stagger left → right across the facade.
         const xs = panes.map((p) => p.delay);
-        const min = Math.min(...xs);
-        const span = Math.max(0.001, Math.max(...xs) - min);
+        const min = xs.length ? Math.min(...xs) : 0;
+        const span = xs.length ? Math.max(0.001, Math.max(...xs) - min) : 1;
         panes.forEach((p) => {
           p.delay = (p.delay - min) / span;
         });
@@ -158,7 +153,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
       found.push({ name, node, restY: node.position.y });
     });
 
-    return { root: cloned, parts: found, glassMats, riseLocal, wallClip, panes, wallMats };
+    return { root: cloned, parts: found, glassMats, riseLocal, wallClip, panes };
   }, [gltf.scene]);
 
   // Park every part out of frame and hide it on mount so there's no flash of
@@ -205,16 +200,6 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
           part.node.visible = ramp > 0.001;
           // World height of the wall top (base sits at y=0).
           wallClip.constant = buildingMetrics.height * 1.02 * smoothstep(ramp);
-          // Mid-build the cut edge is open, so render both faces; once the
-          // walls are whole, restore each material's authored sidedness.
-          const cutting = ramp > 0.001 && ramp < 0.999;
-          wallMats.forEach(({ mat, side }) => {
-            const want = cutting ? THREE.DoubleSide : side;
-            if (mat.side !== want) {
-              mat.side = want;
-              mat.needsUpdate = true;
-            }
-          });
           break;
         }
         case "WINDOWS": {
