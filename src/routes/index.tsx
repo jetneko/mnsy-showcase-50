@@ -20,6 +20,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "MNSY Construction builds and renovates residential and commercial properties across the Philippines. Precision planning, quality craftsmanship, on-time delivery." },
       { property: "og:title", content: "MNSY Construction — Residential & Commercial Contractor Philippines" },
       { property: "og:description", content: "MNSY Construction builds and renovates residential and commercial properties across the Philippines. Precision planning, quality craftsmanship, on-time delivery." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "/" },
     ],
     links: [{ rel: "canonical", href: "/" }],
