@@ -31,6 +31,8 @@ export function Lighting({ mobile }: { mobile: boolean }) {
     }
     if (ambRef.current) {
       ambRef.current.intensity = 0.5 - 0.2 * warm;
+      // Blue ambient desaturates warm paint; shift it neutral-warm at the end.
+      ambRef.current.color.set("#a8c8ff").lerp(new THREE.Color("#fff1e0"), warm);
     }
   });
 
