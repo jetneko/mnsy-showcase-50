@@ -26,10 +26,11 @@ export function Lighting({ mobile }: { mobile: boolean }) {
       const cool = new THREE.Color("#7ec8ff");
       const golden = new THREE.Color("#ffd39a");
       keyRef.current.color.copy(cool).lerp(golden, warm);
-      keyRef.current.intensity = 1.5 + 0.9 * warm;
+      // Kept moderate so off-white paint doesn't clip to flat white.
+      keyRef.current.intensity = 1.3 + 0.35 * warm;
     }
     if (ambRef.current) {
-      ambRef.current.intensity = 0.75 - 0.1 * warm;
+      ambRef.current.intensity = 0.5 - 0.2 * warm;
     }
   });
 

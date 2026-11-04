@@ -168,6 +168,54 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     panes.forEach((p) => p.mesh.scale.setScalar(0.0001));
   }, [parts, riseLocal, wallClip, panes]);
 
+  // The exported GLTF points its stone image at bufferView 0 (vertex data), so
+  // the loader fails and the cladding renders untextured white. The real PNG
+  // lives in bufferView 3 — extract it and attach it to the stone material.
+  useEffect(() => {
+    let cancelled = false;
+    let tex: THREE.Texture | null = null;
+    (async () => {
+      try {
+        const json = await (await fetch(modelAsset.url)).json();
+        const bv = json.bufferViews.find(
+          (v: { buffer: number; byteOffset?: number; target?: number }) =>
+            v.buffer === 1 && !v.target,
+        );
+        if (!bv) return;
+        const buf = await (await fetch(json.buffers[bv.buffer].uri)).arrayBuffer();
+        const off = bv.byteOffset ?? 0;
+        const blob = new Blob([buf.slice(off, off + bv.byteLength)], { type: "image/png" });
+        const bmpUrl = URL.createObjectURL(blob);
+        tex = await new THREE.TextureLoader().loadAsync(bmpUrl);
+        URL.revokeObjectURL(bmpUrl);
+        if (cancelled) return;
+        tex.flipY = false;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.anisotropy = 8;
+        root.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          mats.forEach((m) => {
+            const std = m as THREE.MeshStandardMaterial;
+            if (/stone|ashlar/i.test(std.name)) {
+              std.map = tex;
+              std.color.setRGB(1, 1, 1);
+              std.needsUpdate = true;
+            }
+          });
+        });
+      } catch (e) {
+        console.warn("[AboutScene] stone texture recovery failed", e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      tex?.dispose();
+    };
+  }, [root]);
+
   // Hedge positions along the front edge — derived from the fitted footprint.
   const hedgeDefs = useMemo(() => {
     const w = buildingMetrics.width;

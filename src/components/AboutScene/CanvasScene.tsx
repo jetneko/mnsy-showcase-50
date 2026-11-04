@@ -30,6 +30,9 @@ export default function CanvasScene({
         dpr={mobile ? [1, 1.25] : [1, 1.75]}
         camera={{ position: [0, 22, 0.01], fov: 40, near: 0.1, far: 200 }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
+        onCreated={({ gl }) => {
+          gl.toneMappingExposure = 0.9;
+        }}
         style={{ position: "absolute", inset: 0 }}
       >
         <color attach="background" args={["#05070d"]} />
