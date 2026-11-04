@@ -7,7 +7,7 @@ import { smoothstep, stageLocal } from "./stages";
 import { buildingMetrics } from "./building";
 // Pre-processed (inverted, high-contrast) version of the real floor plan so the
 // linework can be additively composited as glowing blueprint lines.
-import floorplan from "@/assets/mars-chua-floorplan-glow.png.asset.json";
+import floorplanUrl from "@/assets/mars-chua-floorplan-glow.png";
 
 /**
  * Blueprint layer: the real Mars Chua floor plan laid flat on the ground with a
@@ -19,7 +19,7 @@ export function Blueprint() {
   const planRef = useRef<THREE.Mesh>(null);
   const gridRef = useRef<THREE.Mesh>(null);
 
-  const map = useTexture(floorplan.url);
+  const map = useTexture(floorplanUrl);
   // Thin CAD linework minifies into near-invisibility at the top-down camera
   // height, so crank anisotropic filtering and keep mipmaps sharp.
   useMemo(() => {
