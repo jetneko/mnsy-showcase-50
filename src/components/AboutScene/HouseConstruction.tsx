@@ -14,7 +14,6 @@ import {
   partRamp,
   partReveal,
 } from "./building";
-import { ProceduralDoors } from "./ProceduralDoors";
 import modelAsset from "@/assets/mars_chua_parts.gltf.asset.json";
 
 /**
@@ -103,18 +102,8 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
           // Materials are authored in the model — keep every color/roughness as
           // exported. Only collect the glazing so it can light up at dusk.
           if (std.transparent) {
-            // Glass: render after opaque walls/frames and read clearly against
-            // the dark interior (authored 0.45 alpha vanished on screen).
             std.depthWrite = false;
-            std.opacity = Math.max(std.opacity, 0.7);
-            mesh.renderOrder = 10;
             if (!glassMats.includes(std)) glassMats.push(std);
-          }
-          // Frames: authored metalness 0.6 renders near-black with no environment
-          // map to reflect, so the frames disappeared. Keep colour, tame metal.
-          if (name === "WINDOWS" && !std.transparent && std.metalness > 0.3) {
-            std.metalness = 0.25;
-            std.roughness = Math.max(std.roughness, 0.45);
           }
           if (name !== "WALLS") return std;
           // Isolate the clipping plane from materials used by other parts.
@@ -266,9 +255,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
           part.node.visible = ramp > 0.001;
           panes.forEach((pane) => {
             const local = (ramp - pane.delay * 0.45) / 0.55;
-            // Lock to exactly 1 once installed so nothing ends undersized.
-            const s =
-              local >= 1 ? 1 : local <= 0 ? 0.0001 : Math.max(0.0001, easeSnap(local));
+            const s = local <= 0 ? 0.0001 : Math.max(0.0001, easeSnap(Math.min(1, local)));
             pane.mesh.scale.setScalar(s);
             pane.mesh.position.copy(pane.rest);
           });
@@ -326,7 +313,6 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
 
       {/* The real model, split into FLOOR / WALLS / WINDOWS / ROOF. */}
       <primitive object={root} />
-      <ProceduralDoors />
 
       {/* Hedges — landscape stage */}
       <group ref={hedgesRef}>
