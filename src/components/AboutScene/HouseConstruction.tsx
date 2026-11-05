@@ -14,7 +14,7 @@ import {
   partRamp,
   partReveal,
 } from "./building";
-import modelAsset from "@/assets/mars_chua_parts.gltf.asset.json";
+import modelUrl from "@/assets/mars_chua_parts.gltf?url";
 
 /**
  * The parts GLTF ships four genuinely separate objects. Each maps to one stage
@@ -41,7 +41,7 @@ const PART_STAGE: Record<PartName, number> = {
 
 export function HouseConstruction({ mobile }: { mobile: boolean }) {
   const progress = useProgressRef();
-  const gltf = useGLTF(modelAsset.url);
+  const gltf = useGLTF(modelUrl);
   const { gl } = useThree();
 
   const groundRef = useRef<THREE.Mesh>(null);
@@ -176,7 +176,7 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
     let tex: THREE.Texture | null = null;
     (async () => {
       try {
-        const json = await (await fetch(modelAsset.url)).json();
+        const json = await (await fetch(modelUrl)).json();
         const bv = json.bufferViews.find(
           (v: { buffer: number; byteOffset?: number; target?: number }) =>
             v.buffer === 1 && !v.target,
@@ -328,4 +328,4 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
 }
 
 // Preload so the model streams alongside the lazy chunk.
-useGLTF.preload(modelAsset.url);
+useGLTF.preload(modelUrl);
