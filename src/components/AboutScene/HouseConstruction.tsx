@@ -299,14 +299,19 @@ export function HouseConstruction({ mobile }: { mobile: boolean }) {
 
   return (
     <group>
-      {/* Ground plane */}
-      <mesh ref={groundRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
+      {/* Ground plane. Sunk slightly below y=0 so it never shares a depth
+          plane with the FLOOR part once it rises and settles at y=0 — the
+          two were exactly coplanar (both at y=0) and z-fought/flickered
+          across the whole footprint. */}
+      <mesh ref={groundRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.08, 0]} receiveShadow>
         <planeGeometry args={[80, 80]} />
         <meshStandardMaterial color="#141a26" roughness={1} />
       </mesh>
 
-      {/* Foundation slab, just below the blueprint plan so it never occludes it */}
-      <mesh position={[0, -0.06, 0]} receiveShadow>
+      {/* Foundation footing — a thin slab buried under the (now sunk) ground
+          plane so its silhouette reads through the dirt without ever being
+          close enough in depth to z-fight with it. */}
+      <mesh position={[0, -0.2, 0]} receiveShadow>
         <boxGeometry args={[buildingMetrics.width * 1.04, 0.1, buildingMetrics.depth * 1.06]} />
         <meshStandardMaterial color="#1e2530" roughness={1} />
       </mesh>
